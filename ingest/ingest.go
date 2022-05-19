@@ -13,6 +13,7 @@ const TIKA_PATH = "internal/tika-server-1.21.jar"
 
 type Document struct {
 	Name string
+	Path string
 	Contents string
 }
 
@@ -30,7 +31,7 @@ func IngestDocuments(directory string) ([]Document, error) {
 	for i, file := range files {
         log.Println("Parsing ", file.Name())
 		res := IngestDocument(tikaServer, directory + "/" + file.Name())
-		docs[i] = Document{file.Name(), res}
+		docs[i] = Document{file.Name(), directory + "/" + file.Name(), res}
     }
 
 	return docs, nil

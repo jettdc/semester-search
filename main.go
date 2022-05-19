@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"jettdc/semester-search/ingest"
+	"github.com/skratchdot/open-golang/open"
 )
 
 func main() {
@@ -12,6 +13,8 @@ func main() {
 	}
 	
 	for _, doc := range docs {
-		fmt.Println(doc.Name)
+		fmt.Println(doc.Path)
+		err := open.Run(doc.Path)
+		fmt.Println(err)
 	}
 }
