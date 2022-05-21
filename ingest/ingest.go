@@ -15,6 +15,7 @@ type Document struct {
 	Name string
 	Path string
 	Contents string
+	Checksum string
 }
 
 func IngestDocuments(directory string) ([]Document, error) {
@@ -27,26 +28,47 @@ func IngestDocuments(directory string) ([]Document, error) {
     }
 
 	docs := make([]Document, len(files))
+	parsedDocuments := GetParsedDocuments()
 
 	for i, file := range files {
-        log.Println("Parsing ", file.Name())
-		res := IngestDocument(tikaServer, directory + "/" + file.Name())
-		docs[i] = Document{file.Name(), directory + "/" + file.Name(), res}
+		path := directory + "/" + file.Name()
+		checksum := GetChecksum(path)
+
+		parsedDocument, documentHasBeenParsed := parsedDocuments[checksum]
+
+		if !documentHasBeenParsed {
+			log.Println("New document detected: ", file.Name())
+			ingested := IngestDocument(tikaServer, path)
+			parsedDocument = Document{file.Name(), path, ingested, checksum}
+		}
+
+		docs[i] = parsedDocument
     }
 
+	// Dump to json before exiting
+	DumpToFile(docs)
+
 	return docs, nil
+}
+
+func DumpToFile(documents []Document) {
+	json := DocumentsToJSON(documents)
+	_ = ioutil.WriteFile("./internal/ingested.json", json, 0644)
 }
 
 func IngestDocument(server *tika.Server, path string) (string) {
 	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
-		return "Fixk!"
 	}
 	defer f.Close()
 
 	client := tika.NewClient(nil, server.URL())
 	body, err := client.Parse(context.Background(), f)
+
+	if err != nil {
+		log.Fatal("Error parsing document...", err)
+	}
 
 	return body
 }

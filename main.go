@@ -13,7 +13,7 @@ func main() {
 	}
 	
 	for _, doc := range docs {
-		fmt.Println(doc.Contents)
+		fmt.Println(doc.Name)
 		// err := open.Run(doc.Contents)
 		// fmt.Println(err)
 	}
