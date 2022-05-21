@@ -51,10 +51,6 @@ func IngestDocuments(directory string) ([]Document, error) {
 	return docs, nil
 }
 
-func DumpToFile(documents []Document) {
-	json := DocumentsToJSON(documents)
-	_ = ioutil.WriteFile("./internal/ingested.json", json, 0644)
-}
 
 func IngestDocument(server *tika.Server, path string) (string) {
 	f, err := os.Open(path)

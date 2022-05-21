@@ -57,3 +57,8 @@ func GetParsedDocuments() map[string]Document {
 
 	return payload
 }
+
+func DumpToFile(documents []Document) {
+	json := DocumentsToJSON(documents)
+	_ = ioutil.WriteFile("./internal/ingested.json", json, 0644)
+}
