@@ -16,7 +16,8 @@ func main() {
 
 	idx := make(search.Index)
 	idx.IndexDocuments(docs)
-	ds := idx.Search("narratorial function")
+	ds := idx.Search("fuck")
+
 	for i, d := range ds {
 		log.Println(i, ":", d.Checksum, d.Name)
 	}
