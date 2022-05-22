@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/juliangruber/go-intersect"
 	"jettdc/semester-search/ingest"
-	"log"
 	"sort"
 )
 
@@ -40,8 +39,6 @@ func (idx Index) Search(searchTerm string) []ingest.Document {
 	}
 
 	r = sortByRelevance(r, docScores)
-
-	log.Println(docScores)
 
 	docs := make([]ingest.Document, len(r))
 	parsedDocs := ingest.GetParsedDocuments()
