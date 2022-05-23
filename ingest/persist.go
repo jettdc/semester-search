@@ -1,16 +1,15 @@
 package ingest
 
 import (
-	"log"
-	"encoding/json"
 	"encoding/hex"
+	"encoding/json"
 	"io"
 	"io/ioutil"
+	"log"
 
 	"crypto/sha256"
 	"os"
 )
-
 
 func DocumentsToJSON(documents []Document) []byte {
 	parsedDocuments := make(map[string]Document)
@@ -22,13 +21,13 @@ func DocumentsToJSON(documents []Document) []byte {
 	res, err := json.Marshal(parsedDocuments)
 
 	if err != nil {
-        log.Fatal(err)
-    }
+		log.Fatal(err)
+	}
 
 	return res
 }
 
-func GetChecksum(path string) (string) {
+func GetChecksum(path string) string {
 	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -44,17 +43,20 @@ func GetChecksum(path string) (string) {
 }
 
 func GetParsedDocuments() map[string]Document {
-	content, err := ioutil.ReadFile("./internal/ingested.json")
-    if err != nil {
-        log.Fatal("Error when opening file: ", err)
-    }
- 
-    var payload map[string]Document
-    err = json.Unmarshal(content, &payload)
-    if err != nil {
-        log.Fatal("Error during Unmarshal(): ", err)
-    }
+	log.Println("Checking for cached documents...")
 
+	content, err := ioutil.ReadFile("./internal/ingested.json")
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	var payload map[string]Document
+	err = json.Unmarshal(content, &payload)
+	if err != nil {
+		log.Fatal("Error during Unmarshal(): ", err)
+	}
+
+	log.Println("Found", len(payload), "documents in cache")
 	return payload
 }
 

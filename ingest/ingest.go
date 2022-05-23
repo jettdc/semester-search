@@ -1,34 +1,28 @@
 package ingest
 
 import (
-	"os"
 	"context"
-	"io/ioutil"
 	"errors"
-	"log"
 	"github.com/google/go-tika/tika"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
-const TIKA_PATH = "internal/tika-server-1.21.jar" 
-
-type Document struct {
-	Name string
-	Path string
-	Contents string
-	Checksum string
-}
+const TIKA_PATH = "internal/tika-server-1.21.jar"
 
 func IngestDocuments(directory string) ([]Document, error) {
-	tikaServer := setupTika()
-	defer tikaServer.Stop()
+	log.Println("Ingesting documents")
 
 	files, err := ioutil.ReadDir(directory)
-    if err != nil {
+	if err != nil {
 		return nil, err
-    }
+	}
 
 	docs := make([]Document, len(files))
 	parsedDocuments := GetParsedDocuments()
+
+	var tikaServer *tika.Server
 
 	for i, file := range files {
 		path := directory + "/" + file.Name()
@@ -38,27 +32,38 @@ func IngestDocuments(directory string) ([]Document, error) {
 
 		if !documentHasBeenParsed {
 			log.Println("New document detected: ", file.Name())
+
+			// Only start the document parsing server if needed
+			if tikaServer == nil {
+				tikaServer = setupTika()
+				defer tikaServer.Stop()
+			}
+
 			ingested := IngestDocument(tikaServer, path)
 			parsedDocument = Document{file.Name(), path, ingested, checksum}
 		}
 
 		docs[i] = parsedDocument
-    }
+	}
 
-	// Dump to json before exiting
-	DumpToFile(docs)
+	if tikaServer == nil {
+		log.Println("No new documents detected.")
+	} else {
+		log.Println("Updating document cache.")
+		DumpToFile(docs)
+	}
 
 	return docs, nil
 }
 
-
-func IngestDocument(server *tika.Server, path string) (string) {
+func IngestDocument(server *tika.Server, path string) string {
 	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
+	log.Println("Attempting to parse document located at", path)
 	client := tika.NewClient(nil, server.URL())
 	body, err := client.Parse(context.Background(), f)
 
@@ -70,6 +75,7 @@ func IngestDocument(server *tika.Server, path string) (string) {
 }
 
 func setupTika() *tika.Server {
+	log.Println("Setting up the document parsing server")
 	defer handleSetupFailure()
 
 	// Download the document parsing server
@@ -94,39 +100,32 @@ func setupTika() *tika.Server {
 
 func handleSetupFailure() {
 	if a := recover(); a != nil {
-        log.Println("Document parser setup failed with the following message:", a)
-		os.Exit(1)
-    }
+		log.Fatal("Document parser setup failed with the following message:", a)
+	}
 }
 
 func tikaDownloaded() bool {
 	_, err := os.Stat(TIKA_PATH)
-    return !errors.Is(err, os.ErrNotExist)
+	return !errors.Is(err, os.ErrNotExist)
 }
-
 
 func downloadTika() error {
 	err := tika.DownloadServer(context.Background(), "1.21", TIKA_PATH)
 	if err != nil {
 		log.Fatal(err)
-		return err
 	}
 	return nil
 }
-
-
 
 func startTikaServer() (*tika.Server, error) {
 	s, err := tika.NewServer(TIKA_PATH, "")
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
 	}
 
 	err = s.Start(context.Background())
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
 	}
 
 	return s, nil
