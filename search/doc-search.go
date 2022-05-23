@@ -34,8 +34,8 @@ func GetDocSearchResults(doc ingest.Document, searchTerm string) DocSearchResult
 	res := DocSearchResults{}
 
 	// In descending order of relevance
-	//res = recordExactMatches(res, doc, searchTerm)
-	//res = recordExactStemmerMatches(res, doc, searchTerm)
+	res = recordExactMatches(res, doc, searchTerm)
+	res = recordExactStemmerMatches(res, doc, searchTerm)
 	res = recordTrueProximityMatches(res, doc, searchTerm)
 	res = recordStemmerProximityMatches(res, doc, searchTerm)
 	res = recordLooseInstances(res, doc, searchTerm)
@@ -110,7 +110,7 @@ func recordExactStemmerMatches(res DocSearchResults, doc ingest.Document, term s
 // If searching for "stronger soap", might return an excerpt with "stronger than competitors and is a leading soap"
 func recordTrueProximityMatches(res DocSearchResults, doc ingest.Document, term string) DocSearchResults {
 	basicTokenizedDoc := BasicTokenize(doc.Contents)
-	basicTokenizedSearch := BasicTokenize(term)
+	basicTokenizedSearch := BasicTokenizeNoStopwords(term)
 
 	matches := make([]int, 0)
 	for docIndex, docWord := range basicTokenizedDoc {
@@ -130,8 +130,23 @@ func recordTrueProximityMatches(res DocSearchResults, doc ingest.Document, term 
 // Search for disconnected instances of stemmer search words
 // If searching for "stronger soap", might return an excerpt with "the soap is as strong as can be"
 func recordStemmerProximityMatches(res DocSearchResults, doc ingest.Document, term string) DocSearchResults {
+	tokenizedDoc := TokenizeTextKeepStopwords(doc.Contents)
+	tokenizedSearch := tokenizeText(term)
 
-	return res
+	matches := make([]int, 0)
+	for docIndex, docWord := range tokenizedDoc {
+		if sliceContains(tokenizedSearch, docWord) && WordsAreInProximity(tokenizedSearch, tokenizedDoc, docIndex) {
+			matches = append(matches, docIndex)
+		}
+	}
+
+	basicTokenizedDoc := BasicTokenize(doc.Contents)
+	excerpts := make([]Excerpt, 0)
+	for _, match := range matches {
+		excerpts = append(excerpts, makeExcerpt(match, basicTokenizedDoc, tokenizedSearch))
+	}
+
+	return mergeDocSearchResults(res, excerpts)
 }
 
 // Pick up any missed terms, either exact or stemmer. Any instance that matches any of the search words will be returned

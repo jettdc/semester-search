@@ -47,6 +47,13 @@ func BasicTokenize(content string) []string {
 	return tokens
 }
 
+func BasicTokenizeNoStopwords(content string) []string {
+	tokens := tokenize(content)
+	tokens = lowercaseFilter(tokens)
+	tokens = stopwordFilter(tokens)
+	return tokens
+}
+
 // Split on any character that is not a letter or a number
 func tokenize(text string) []string {
 	return strings.FieldsFunc(text, func(r rune) bool {

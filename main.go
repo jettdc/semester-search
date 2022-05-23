@@ -21,5 +21,5 @@ func main() {
 		log.Println(i, ":", d.Checksum, d.Name)
 	}
 
-	search.GetDocSearchResults(ds[0], "Toxic Masculinity")
+	search.GetDocSearchResults(ds[0], "masculinity that is toxic")
 }
