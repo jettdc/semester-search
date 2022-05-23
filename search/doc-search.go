@@ -1,8 +1,9 @@
 package search
 
 import (
+	"encoding/json"
+	"fmt"
 	"jettdc/semester-search/ingest"
-	"log"
 	"math"
 	"strings"
 )
@@ -16,17 +17,32 @@ type DocSearchResults struct {
 	Excerpts []Excerpt
 }
 
+func PrettyPrint(v interface{}) (err error) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err == nil {
+		fmt.Println(string(b))
+	}
+	return
+}
+
+// When getting doc search results for all docs, do it concurrently
+
 func GetDocSearchResults(doc ingest.Document, searchTerm string) DocSearchResults {
 	res := DocSearchResults{}
+
+	// In descending order of relevance
 	res = recordExactMatches(res, doc, searchTerm)
 	res = recordExactStemmerMatches(res, doc, searchTerm)
 	res = recordTrueProximityMatches(res, doc, searchTerm)
 	res = recordStemmerProximityMatches(res, doc, searchTerm)
 	res = recordLooseInstances(res, doc, searchTerm)
-	log.Println(res)
+
+	PrettyPrint(res)
+
 	return res
 }
 
+// Search for exact word matches, if searching "stronger soap", find exact matches "stronger soap"
 func recordExactMatches(res DocSearchResults, doc ingest.Document, term string) DocSearchResults {
 	basicTokenizedDoc := BasicTokenize(doc.Contents)
 	basicTokenizedSearch := BasicTokenize(term)
@@ -53,25 +69,34 @@ func recordExactMatches(res DocSearchResults, doc ingest.Document, term string) 
 	return mergeDocSearchResults(res, excerpts)
 }
 
+// Search for stemmer matches to account for word variations
+// If searching "stronger soap", find exact matches "strong soap"
 func recordExactStemmerMatches(res DocSearchResults, doc ingest.Document, term string) DocSearchResults {
 	return res
 }
 
+// Search for disconnected instances of exact search words
+// If searching for "stronger soap", might return an excerpt with "stronger than competitors and is a leading soap"
 func recordTrueProximityMatches(res DocSearchResults, doc ingest.Document, term string) DocSearchResults {
 
 	return res
 }
 
+// Search for disconnected instances of stemmer search words
+// If searching for "stronger soap", might return an excerpt with "the soap is as strong as can be"
 func recordStemmerProximityMatches(res DocSearchResults, doc ingest.Document, term string) DocSearchResults {
 
 	return res
 }
 
+// Pick up any missed terms, either exact or stemmer. Any instance that matches any of the search words will be returned
+// If searching for "stronger soap", might return an excerpt with "the soap is amazing" or "I am a very strong guy"
 func recordLooseInstances(res DocSearchResults, doc ingest.Document, term string) DocSearchResults {
 
 	return res
 }
 
+// Return an excerpt with padding surrounding the index requested
 func makeExcerpt(index int, doc []string, search []string) Excerpt {
 	padding := 50
 	lowerBound := int(math.Max(0.0, float64(index-padding)))
