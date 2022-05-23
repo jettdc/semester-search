@@ -8,6 +8,8 @@ import (
 )
 
 func main() {
+	const SearchTerm = "queer cowboy"
+
 	docs, err := ingest.IngestDocuments("./documents")
 	if err != nil {
 		fmt.Println("Broken")
@@ -15,11 +17,10 @@ func main() {
 
 	idx := make(search.Index)
 	idx.IndexDocuments(docs)
-	ds := idx.Search("queer cowboy")
+	ds := idx.Search(SearchTerm)
 
-	for i, d := range ds {
-		log.Println(i, ":", d.Checksum, d.Name)
+	for _, d := range ds {
+		sr := search.GetDocSearchResults(d, SearchTerm)
+		log.Println(sr.NumResults, d.Name)
 	}
-
-	search.GetDocSearchResults(ds[0], "masculinity that is toxic")
 }

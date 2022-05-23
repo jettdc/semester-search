@@ -1,8 +1,10 @@
 package search
 
-import "math"
-
-const ProximityRadius = 5
+import (
+	"encoding/json"
+	"fmt"
+	"math"
+)
 
 func removeFromSlice(slice []string, term string) []string {
 	res := make([]string, 0)
@@ -33,7 +35,7 @@ func WordsAreInProximity(searchTerms []string, searching []string, index int) bo
 
 	// See if any matches on the left side
 	isInLeft := false
-	leftRange := int(math.Max(float64(index-ProximityRadius), 0))
+	leftRange := int(math.Max(float64(index-ProximitySearchRadius), 0))
 	leftFoundIndex := -1
 	for i := leftRange; i < index; i++ {
 		if sliceContains(nowLookingFor, searching[i]) {
@@ -49,7 +51,7 @@ func WordsAreInProximity(searchTerms []string, searching []string, index int) bo
 
 	// See if any matches on the right side
 	isInRight := false
-	rightRange := int(math.Min(float64(index+ProximityRadius), float64(len(searching)-1)))
+	rightRange := int(math.Min(float64(index+ProximitySearchRadius), float64(len(searching)-1)))
 	rightFoundIndex := -1
 	for i := index + 1; i <= rightRange; i++ {
 		if sliceContains(nowLookingFor, searching[i]) {
@@ -64,4 +66,12 @@ func WordsAreInProximity(searchTerms []string, searching []string, index int) bo
 	}
 
 	return isInLeft || isInRight
+}
+
+func PrettyPrint(v interface{}) (err error) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err == nil {
+		fmt.Println(string(b))
+	}
+	return
 }

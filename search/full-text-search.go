@@ -12,7 +12,11 @@ import (
 
 func (idx Index) Search(searchTerm string) []ingest.Document {
 	var r []string
-	tokenizedSearchTerm := tokenizeText(searchTerm)
+	tokenizedSearchTerm := getTokenizedText(searchTerm).
+		MakeLowerCase().
+		RemoveStopWords().
+		StemmerFilter().
+		Build()
 
 	docScores := map[string]int{}
 
