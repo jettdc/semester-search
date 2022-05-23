@@ -176,6 +176,7 @@ func getProximityMatchIndices(tokenizedDoc Tokenized, tokenizedSearch Tokenized)
 
 // Pick up any missed terms, either exact or stemmer. Any instance that matches any of the search words will be returned
 // If searching for "stronger soap", might return an excerpt with "the soap is amazing" or "I am a very strong guy"
+// Perhaps later change so that at least half of the terms have to be found?
 func recordLooseInstances(doc ingest.Document, term string, channel chan DocSearchResults) {
 	searchResults := makeEmptyDocSearchResults(term, "Loose Match", 4)
 
