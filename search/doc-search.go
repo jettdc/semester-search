@@ -109,17 +109,22 @@ func recordExactStemmerMatches(res DocSearchResults, doc ingest.Document, term s
 // Search for disconnected instances of exact search words
 // If searching for "stronger soap", might return an excerpt with "stronger than competitors and is a leading soap"
 func recordTrueProximityMatches(res DocSearchResults, doc ingest.Document, term string) DocSearchResults {
-	//basicTokenizedDoc := BasicTokenize(doc.Contents)
-	//basicTokenizedSearch := BasicTokenize(term)
+	basicTokenizedDoc := BasicTokenize(doc.Contents)
+	basicTokenizedSearch := BasicTokenize(term)
 
-	//matches := make([]int, 0)
-	//for docIndex, docWord := range basicTokenizedDoc {
-	//	for searchTermIndex, searchTerm := range basicTokenizedSearch {
-	//
-	//	}
-	//}
+	matches := make([]int, 0)
+	for docIndex, docWord := range basicTokenizedDoc {
+		if sliceContains(basicTokenizedSearch, docWord) && WordsAreInProximity(basicTokenizedSearch, basicTokenizedDoc, docIndex) {
+			matches = append(matches, docIndex)
+		}
+	}
 
-	return res
+	excerpts := make([]Excerpt, 0)
+	for _, match := range matches {
+		excerpts = append(excerpts, makeExcerpt(match, basicTokenizedDoc, basicTokenizedSearch))
+	}
+
+	return mergeDocSearchResults(res, excerpts)
 }
 
 // Search for disconnected instances of stemmer search words
