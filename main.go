@@ -22,5 +22,7 @@ func main() {
 	for _, d := range ds {
 		sr := search.GetDocSearchResults(d, SearchTerm)
 		log.Println(sr.NumResults, d.Name)
+		input := bufio.NewScanner(os.Stdin)
+		input.Scan()
 	}
 }
