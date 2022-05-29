@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/skratchdot/open-golang/open"
 	"jettdc/semester-search/gui"
 	"jettdc/semester-search/ingest"
 	"jettdc/semester-search/search"
@@ -62,6 +63,8 @@ out:
 				break nextRes
 			} else if input.Text() == "quit" || input.Text() == "q" {
 				break out
+			} else if input.Text() == "open" || input.Text() == "o" {
+				open.Run(d.Path)
 			}
 		}
 	}
