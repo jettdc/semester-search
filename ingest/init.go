@@ -22,6 +22,13 @@ func init() {
 		log.Println("Ingest cache OK")
 	}
 
+	if !fileExists("./documents") {
+		log.Println("Creating documents directory")
+		createInternalDirectory()
+	} else {
+		log.Println("Documents directory OK")
+	}
+
 	log.Println("Configurations OK")
 }
 
@@ -29,6 +36,14 @@ func createInternalDirectory() {
 	err := os.Mkdir("./internal", 0755)
 	if err != nil {
 		log.Fatal("Failed to create internal directory.")
+	}
+	return
+}
+
+func createDocumentsDirectory() {
+	err := os.Mkdir("./documents", 0755)
+	if err != nil {
+		log.Fatal("Failed to create documents directory.")
 	}
 	return
 }
