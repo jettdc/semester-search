@@ -2,11 +2,17 @@
 Semester search is a utility for quickly searching through downloadable class materials so that you can spend more time
 learning and less time clicking through dozens of links on your professor's websites.
 
+## How To Run
+- Make sure java is installed on your computer and available in your path
+- Create a directory at `./documents` to place your documents in
+  - Conversely, if you run the program once without documents, it will create this folder automatically.
+- run `main.go`
+
 ## How does it work?
 After placing your documents (tested with pdf, pptx, and doc so far) into the `documents` directory,
 the program will scan through them, noting any new documents since the last time you opened the search utility.
 
-If you have not added any new documents, the engine will used the cached versions of the (parsed)
+If you have not added any new documents, the engine will use the cached versions of the (parsed)
 documents to perform your searches.
 
 If you have added or removed documents since your last search, the engine will reindex your documents. It does this by

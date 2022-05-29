@@ -46,9 +46,13 @@ func IngestDocuments(directory string) ([]Document, error) {
 		docs[i] = parsedDocument
 	}
 
-	if tikaServer == nil {
+	if tikaServer == nil && len(docs) > 0 {
 		log.Println("No new documents detected.")
 	} else {
+		if len(docs) == 0 {
+			log.Println("No documents found. Try placing the files into the ./documents directory.")
+		}
+
 		log.Println("Updating document cache.")
 		DumpToFile(docs)
 	}

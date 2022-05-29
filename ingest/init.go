@@ -24,7 +24,7 @@ func init() {
 
 	if !fileExists("./documents") {
 		log.Println("Creating documents directory")
-		createInternalDirectory()
+		createDocumentsDirectory()
 	} else {
 		log.Println("Documents directory OK")
 	}
