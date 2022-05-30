@@ -64,7 +64,7 @@ out:
 			} else if input.Text() == "quit" || input.Text() == "q" {
 				break out
 			} else if input.Text() == "open" || input.Text() == "o" {
-				open.Run(d.Path)
+				open.Start(d.Path)
 			}
 		}
 	}

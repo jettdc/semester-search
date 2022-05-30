@@ -2,6 +2,9 @@
 Semester search is a utility for quickly searching through downloadable class materials so that you can spend more time
 learning and less time clicking through dozens of links on your professor's websites.
 
+![Semester Search starting up.](static/blankstartup.png)  
+![An example of searching with the utility.](static/search-example.png)
+
 ## How To Run
 - Make sure java is installed on your computer and available in your path
 - Create a directory at `./documents` to place your documents in
