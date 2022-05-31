@@ -40,11 +40,11 @@ out:
 			fmt.Print("\033[H\033[2J")
 			fmt.Println("\n\n\n")
 
-			j := gui.Jumbotron{}
+			j := gui.NewJumbotron(
+				&gui.Line{Content: fmt.Sprintf("\"%s\"", sr.SearchTerm), Justify: "center"},
+				&gui.Line{Content: "Copyright 2022", Justify: "right"})
+			j.SetMaxWidth(gui.FullWidth)
 			j.SetXPadding(3)
-			j.SetMaxWidth(120)
-
-			j.Header = &gui.Line{Content: fmt.Sprintf("\"%s\"", sr.SearchTerm), Justify: "center"}
 
 			j.AddLine(gui.Line{Content: fmt.Sprintf("[RESULT TYPE]: %s   [DOC #]: %d/%d   [RES #]: %d/%d", result.SearchType, docIndex+1, len(ds), excerptIndex+1, sr.NumResults), Justify: "center"})
 			j.AddLine(gui.Line{Content: fmt.Sprintf("[Inspecting]: %s", d.Name), Justify: "center"})

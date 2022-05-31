@@ -2,8 +2,14 @@ package gui
 
 import (
 	"fmt"
+	"golang.org/x/term"
+	"log"
 	"math"
 )
+
+const DefaultWidth = 80
+const DefaultPadding = 8
+const FullWidth = math.MaxInt
 
 type Line struct {
 	Content string
@@ -12,12 +18,17 @@ type Line struct {
 }
 
 type Jumbotron struct {
-	Header   *Line
-	Footer   *Line
-	Lines    []Line
-	Width    int `default:"80"`
-	XPadding int
-	YPadding int
+	Header    *Line
+	Footer    *Line
+	Lines     []Line
+	Width     int
+	XPadding  int
+	YPadding  int
+	AutoScale bool
+}
+
+func NewJumbotron(header *Line, footer *Line) Jumbotron {
+	return Jumbotron{AutoScale: true, Width: DefaultWidth, Header: header, Footer: footer}
 }
 
 func (j *Jumbotron) AddLine(l Line) {
@@ -54,7 +65,30 @@ func (j *Jumbotron) SetFooter(footer *Line) {
 }
 
 func (j *Jumbotron) SetMaxWidth(width int) {
-	j.Width = width
+	termWidth := getTerminalDim().Width - (j.XPadding * 2) - DefaultPadding
+
+	if !j.AutoScale || width <= termWidth {
+		j.Width = width
+	} else {
+		j.Width = termWidth
+	}
+}
+
+type Dimensions struct {
+	Width  int
+	Height int
+}
+
+func getTerminalDim() Dimensions {
+	if !term.IsTerminal(0) {
+		log.Fatal("Must run inside a terminal.")
+	}
+	width, height, err := term.GetSize(0)
+	if err != nil {
+		log.Fatal("Something went wrong getting terminal dimensions.")
+	}
+
+	return Dimensions{width, height}
 }
 
 func (j *Jumbotron) SetXPadding(padding int) {
@@ -82,18 +116,38 @@ func (j *Jumbotron) getMaxWidth() int {
 	return int(max)
 }
 
-func (j *Jumbotron) printCap() {
+func (j *Jumbotron) printTopCap() {
 	maxWidth := j.getMaxWidth()
 
-	topBar := "----"
+	topBar := "╔══"
 
 	for i := 0; i < (j.XPadding * 2); i++ {
-		topBar += "-"
+		topBar += "═"
 	}
 
 	for i := 0; i < maxWidth; i++ {
-		topBar = topBar + "-"
+		topBar = topBar + "═"
 	}
+
+	topBar += "╗"
+
+	fmt.Println(topBar)
+}
+
+func (j *Jumbotron) printBottomCap() {
+	maxWidth := j.getMaxWidth()
+
+	topBar := "╚══"
+
+	for i := 0; i < (j.XPadding * 2); i++ {
+		topBar += "═"
+	}
+
+	for i := 0; i < maxWidth; i++ {
+		topBar = topBar + "═"
+	}
+
+	topBar += "╝"
 
 	fmt.Println(topBar)
 }
@@ -101,17 +155,17 @@ func (j *Jumbotron) printCap() {
 func (j *Jumbotron) printMidCap() {
 	maxWidth := j.getMaxWidth()
 
-	topBar := "|-"
+	topBar := "╠═"
 
 	for i := 0; i < (j.XPadding * 2); i++ {
-		topBar += "-"
+		topBar += "═"
 	}
 
 	for i := 0; i < maxWidth; i++ {
-		topBar = topBar + "-"
+		topBar = topBar + "═"
 	}
 
-	topBar = topBar + "-|"
+	topBar = topBar + "═╣"
 
 	fmt.Println(topBar)
 }
@@ -119,7 +173,7 @@ func (j *Jumbotron) printMidCap() {
 func (j *Jumbotron) printEmptyCap() {
 	maxWidth := j.getMaxWidth()
 
-	topBar := "| "
+	topBar := "║ "
 
 	for i := 0; i < (j.XPadding * 2); i++ {
 		topBar += " "
@@ -129,7 +183,7 @@ func (j *Jumbotron) printEmptyCap() {
 		topBar = topBar + " "
 	}
 
-	topBar = topBar + " |"
+	topBar = topBar + " ║"
 
 	fmt.Println(topBar)
 }
@@ -143,7 +197,7 @@ func (j *Jumbotron) printYPadding() {
 func (j *Jumbotron) Print() {
 	w := j.getMaxWidth()
 
-	j.printCap()
+	j.printTopCap()
 
 	j.printYPadding()
 
@@ -162,7 +216,7 @@ func (j *Jumbotron) Print() {
 	}
 
 	j.printYPadding()
-	j.printCap()
+	j.printBottomCap()
 }
 
 func (l *Line) getRightJustified(maxWidth int) string {
@@ -201,7 +255,7 @@ func (l *Line) getCentered(maxWidth int) string {
 }
 
 func (l *Line) Print(maxWidth int, xpadding int) { // TODO add wrap length
-	line := "| "
+	line := "║ "
 
 	for i := 0; i < xpadding; i++ {
 		line += " "
@@ -219,7 +273,7 @@ func (l *Line) Print(maxWidth int, xpadding int) { // TODO add wrap length
 		line += " "
 	}
 
-	line = line + " |"
+	line = line + " ║"
 
 	fmt.Println(line)
 }
